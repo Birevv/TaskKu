@@ -5,7 +5,7 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum TaskPriority: string implements HasLabel, HasColor
+enum TaskStatus: string implements HasLabel, HasColor
 {
     case Pending = 'pending';
     case InProgress = 'in_progress';

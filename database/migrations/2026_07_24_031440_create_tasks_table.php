@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('priority')->default('medium');
             $table->string('status')->default('pending');
-            $table->timestamp('due_date')->nullable();
+            $table->timestamp('due_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('archived_at')->nullable();
             $table->timestamp('reminder_at')->nullable();
