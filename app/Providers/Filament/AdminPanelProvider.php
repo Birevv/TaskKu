@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Tenancy\EditWorkspaceProfile;
 use App\Filament\Pages\Tenancy\RegisterWorkspace;
 use App\Models\Workspace;
 use Filament\Http\Middleware\Authenticate;
@@ -34,8 +35,13 @@ class AdminPanelProvider extends PanelProvider
             ->registration()
             ->passwordReset()
             ->profile()
-            ->tenant(Workspace::class, slugAttribute: 'slug')
+            ->tenant(
+                Workspace::class,
+                slugAttribute: 'slug',
+            )
+            ->tenantRoutePrefix('workspaces')
             ->tenantRegistration(RegisterWorkspace::class)
+            ->tenantProfile(EditWorkspaceProfile::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
