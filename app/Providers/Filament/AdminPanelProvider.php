@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Tenancy\RegisterWorkspace;
+use App\Models\Workspace;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -25,9 +27,15 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('admin')
-            ->path('admin')
+            ->id('app')
+            ->path('app')
+            ->brandName('Taskku')
             ->login()
+            ->registration()
+            ->passwordReset()
+            ->profile()
+            ->tenant(Workspace::class, slugAttribute: 'slug')
+            ->tenantRegistration(RegisterWorkspace::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
