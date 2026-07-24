@@ -81,4 +81,12 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
     {
         return $this->name;
     }
+
+    public function assignedTask(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Task::class,
+            'task_assigness'
+        )->withTimestamps();
+    }
 }
