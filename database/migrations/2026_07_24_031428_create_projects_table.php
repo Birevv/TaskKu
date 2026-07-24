@@ -13,7 +13,18 @@ return new class extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('users')->restrictedOnDelete();
+            $table->string('name');
+            $table->string('slug');
+            $table->text('description')->nullable();
+            $table->string('color', 20)->default('#4f46e5');
+            $table->string('visibility', 20)->default('workspace');
+            $table->timestamp('archived_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
+            $table->unique(['workspace_id', 'slug']);
+            $table->index(['workspace_id', 'archived_at']);
         });
     }
 
