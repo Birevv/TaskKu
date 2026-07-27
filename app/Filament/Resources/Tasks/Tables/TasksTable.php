@@ -2,6 +2,10 @@
 
 namespace App\Filament\Resources\Tasks\Tables;
 
+use App\Actions\Task\ChangeTaskStatusAction;
+use App\Enums\TaskStatus;
+use App\Models\Task;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -74,10 +78,33 @@ class TasksTable
             ])
 
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-                RestoreAction::make(),
-                ForceDeleteAction::make(),
+                Action::make('complete')
+                    ->label('Complete')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn (Task $record): bool =>
+                    $record->status !== TaskStatus::Completed
+                    && $record->deleted_at === null
+                    )
+                    ->action(fn (Task $record): Task => app(ChangeTaskStatusAction::class)
+                        ->handle($record, TaskStatus::Completed)
+                    ),
+                Action::make('reopen')
+                    ->label('Reopen')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->visible(fn (Task $record): bool =>
+                        $record->status === TaskStatus::Completed
+                        && $record->deleted_at === null
+                    )
+                    ->action(fn (Task $record): Task =>
+                        app(ChangeTaskStatusAction::class)
+                            ->handle($record, TaskStatus::Pending)
+                    ),
+
+                    EditAction::make(),
+                    DeleteAction::make(),
+                    RestoreAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
