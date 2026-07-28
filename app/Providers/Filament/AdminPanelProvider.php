@@ -4,8 +4,9 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Tenancy\EditWorkspaceProfile;
 use App\Filament\Pages\Tenancy\RegisterWorkspace;
-use App\Models\Workspace;
+use App\Filament\Widgets\DailyProgress;
 use App\Filament\Widgets\TaskStatsOverview;
+use App\Models\Workspace;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -14,6 +15,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -22,7 +24,6 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use App\Filament\Widgets\DailyProgress;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -37,6 +38,10 @@ class AdminPanelProvider extends PanelProvider
             ->registration()
             ->passwordReset()
             ->profile()
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn () => view('filament.theme-preference'),
+            )
             ->tenant(
                 Workspace::class,
                 slugAttribute: 'slug',

@@ -30,8 +30,4 @@ class UserSettings extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-
-
-
 }
