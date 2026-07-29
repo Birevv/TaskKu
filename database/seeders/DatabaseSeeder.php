@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    public function run() : void
+    public function run(): void
     {
         $user = User::query()->updateOrCreate([
             'email' => 'admin@gmail.com',

@@ -13,7 +13,7 @@ class ChangeTaskStatusAction
         return DB::transaction(function () use ($task, $status): Task {
             $task->status = $status;
 
-            if ($status ===  TaskStatus::Completed) {
+            if ($status === TaskStatus::Completed) {
                 $task->completed_at ??= now();
             } else {
                 $task->completed_at = null;

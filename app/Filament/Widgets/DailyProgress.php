@@ -39,9 +39,9 @@ class DailyProgress extends BaseWidget
 
         $percentage = $total === 0
             ? 0
-            : (int) round(($completed/ $total) * 100);
+            : (int) round(($completed / $total) * 100);
 
-         return [
+        return [
             Stat::make('Daily Progress', "{$percentage}%")
                 ->description("{$completed} dari {$total} task selesai")
                 ->descriptionIcon('heroicon-m-chart-bar')

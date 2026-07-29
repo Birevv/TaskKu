@@ -52,9 +52,11 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
 
     public function workspaces(): BelongsToMany
     {
-        return $this->belongsToMany(Workspace::class, 'workspace_members')
-            ->withPivot(['role', 'joined_at'])
-            ->withTimestamps();
+        return $this->belongsToMany(
+            Workspace::class,
+            'workspace_members'
+        )->withPivot(['role', 'joined_at',
+        ]);
     }
 
     public function canAccessPanel(Panel $panel): bool
@@ -79,7 +81,7 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
 
     public function getFilamentName(): string
     {
-        return $this->name;
+        return "{$this->name} ({$this->email})";
     }
 
     public function assignedTasks(): BelongsToMany

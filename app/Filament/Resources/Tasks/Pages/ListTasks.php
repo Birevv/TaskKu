@@ -31,25 +31,22 @@ class ListTasks extends ListRecords
             'inbox' => Tab::make('Inbox')
                 ->icon('heroicon-o-inbox')
                 ->modifyQueryUsing(
-                    fn (Builder $query): Builder =>
-                        $query->active()
+                    fn (Builder $query): Builder => $query->active()
                 ),
 
             'today' => Tab::make('Today')
                 ->icon('heroicon-o-calendar')
                 ->modifyQueryUsing(
-                    fn (Builder $query): Builder =>
-                        $query
-                            ->active()
-                            ->whereNotNull('due_at')
-                            ->where('due_at', '<=', $todayEndUtc)
+                    fn (Builder $query): Builder => $query
+                        ->active()
+                        ->whereNotNull('due_at')
+                        ->where('due_at', '<=', $todayEndUtc)
                 ),
 
             'upcoming' => Tab::make('Upcoming')
                 ->icon('heroicon-o-calendar-days')
                 ->modifyQueryUsing(
-                    fn (Builder $query): Builder =>
-                    $query
+                    fn (Builder $query): Builder => $query
                         ->active()
                         ->where('due_at', '>', $todayEndUtc)
                 ),
@@ -57,8 +54,7 @@ class ListTasks extends ListRecords
             'completed' => Tab::make('Completed')
                 ->icon('heroicon-o-check-circle')
                 ->modifyQueryUsing(
-                    fn (Builder $query): Builder =>
-                    $query
+                    fn (Builder $query): Builder => $query
                         ->where('status', TaskStatus::Completed)
                         ->whereNull('archived_at')
                 ),
@@ -66,8 +62,13 @@ class ListTasks extends ListRecords
             'archived' => Tab::make('Archived')
                 ->icon('heroicon-o-archive-box')
                 ->modifyQueryUsing(
-                    fn (Builder $query): Builder =>
-                    $query ->whereNotNull('archived_at')
+                    fn (Builder $query): Builder => $query->whereNotNull('archived_at')
+                ),
+
+            'trash' => Tab::make('Trash')
+                ->icon('heroicon-o-trash')
+                ->modifyQueryUsing(
+                    fn (Builder $query): Builder => $query->onlyTrashed()
                 ),
 
             'all' => Tab::make('All'),

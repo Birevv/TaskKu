@@ -51,5 +51,3 @@ class Project extends Model
         return $query->whereNull('archived_at');
     }
 }
-
-

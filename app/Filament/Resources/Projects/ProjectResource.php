@@ -26,9 +26,9 @@ class ProjectResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Projects';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-folder';
-    
-    protected static string | UnitEnum | null $navigationGroup = 'Workspace';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-folder';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Workspace';
 
     public static function form(Schema $schema): Schema
     {
@@ -42,7 +42,7 @@ class ProjectResource extends Resource
 
     public static function getRelations(): array
     {
-        return[];
+        return [];
     }
 
     public static function getPages(): array

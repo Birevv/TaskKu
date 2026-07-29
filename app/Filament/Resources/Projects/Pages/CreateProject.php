@@ -6,8 +6,8 @@ use App\Filament\Resources\Projects\ProjectResource;
 use App\Models\Project;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class CreateProject extends CreateRecord
 {
@@ -42,5 +42,10 @@ class CreateProject extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        return 'Projek berhasil dibuat';
     }
 }

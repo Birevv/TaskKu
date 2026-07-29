@@ -11,11 +11,10 @@ use App\Models\Task;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Override;
 
 class TaskResource extends Resource
 {
-    protected  static ?string $model = Task::class;
+    protected static ?string $model = Task::class;
 
     protected static ?string $recordTitleAttribute = 'title';
 
@@ -26,13 +25,12 @@ class TaskResource extends Resource
         return TaskForm::configure($schema);
     }
 
-    public static function table(Table $table) : Table
+    public static function table(Table $table): Table
     {
         return TasksTable::configure($table);
     }
 
-
-    public static function  getRelations(): array
+    public static function getRelations(): array
     {
         return [];
     }

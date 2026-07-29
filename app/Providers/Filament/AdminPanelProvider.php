@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->registration()
             ->passwordReset()
-            ->profile()
+            ->databaseNotifications()
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
                 fn () => view('filament.theme-preference'),

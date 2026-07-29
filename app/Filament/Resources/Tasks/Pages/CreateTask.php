@@ -46,4 +46,9 @@ class CreateTask extends CreateRecord
                 ->sendToDatabase($assignee);
         }
     }
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        return 'Task berhasil dibuat';
+    }
 }

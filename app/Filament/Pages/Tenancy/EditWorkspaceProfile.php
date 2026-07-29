@@ -9,7 +9,7 @@ use Filament\Schemas\Schema;
 
 class EditWorkspaceProfile extends EditTenantProfile
 {
-    public static Function getLabel(): string
+    public static function getLabel(): string
     {
         return 'Workspace Profile';
     }
@@ -31,4 +31,3 @@ class EditWorkspaceProfile extends EditTenantProfile
         ]);
     }
 }
-

@@ -9,7 +9,7 @@ enum ProjectVisibility: string implements HasLabel
     case Workspace = 'workspace';
     case Private = 'private';
 
-    public function getLabel() : string
+    public function getLabel(): string
     {
         return match ($this) {
             self::Workspace => 'Workspace',

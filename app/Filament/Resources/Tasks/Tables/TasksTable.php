@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Tasks\Tables;
 
+use App\Actions\Task\ArchiveTaskAction;
 use App\Actions\Task\ChangeTaskStatusAction;
+use App\Actions\Task\UnarchiveTaskAction;
 use App\Enums\TaskStatus;
 use App\Models\Task;
 use Filament\Actions\Action;
@@ -16,7 +18,6 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class TasksTable
@@ -73,8 +74,6 @@ class TasksTable
                     ->relationship('project', 'name')
                     ->searchable()
                     ->preload(),
-
-                TrashedFilter::make(),
             ])
 
             ->recordActions([
@@ -82,8 +81,7 @@ class TasksTable
                     ->label('Complete')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (Task $record): bool =>
-                    $record->status !== TaskStatus::Completed
+                    ->visible(fn (Task $record): bool => $record->status !== TaskStatus::Completed
                     && $record->deleted_at === null
                     )
                     ->action(fn (Task $record): Task => app(ChangeTaskStatusAction::class)
@@ -93,19 +91,45 @@ class TasksTable
                     ->label('Reopen')
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
-                    ->visible(fn (Task $record): bool =>
-                        $record->status === TaskStatus::Completed
+                    ->visible(fn (Task $record): bool => $record->status === TaskStatus::Completed
                         && $record->deleted_at === null
                     )
-                    ->action(fn (Task $record): Task =>
-                        app(ChangeTaskStatusAction::class)
-                            ->handle($record, TaskStatus::Pending)
+                    ->action(fn (Task $record): Task => app(ChangeTaskStatusAction::class)
+                        ->handle($record, TaskStatus::Pending)
                     ),
 
-                    EditAction::make(),
-                    DeleteAction::make(),
-                    RestoreAction::make(),
+                Action::make('archive')
+                    ->label('Archive')
+                    ->icon('heroicon-o-archive-box')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->visible(
+                        fn (Task $record): bool => is_null($record->archived_at)
+                    )
+                    ->action(function (Task $record): void {
+                        app(ArchiveTaskAction::class)->handle($record);
+                    }),
+
+                Action::make('unarchive')
+                    ->label('Unarchive')
+                    ->icon('heroicon-o-archive-box-x-mark')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(
+                        fn (Task $record): bool => $record->archived_at !== null
+                    )
+                    ->action(function (Task $record): void {
+                        app(UnarchiveTaskAction::class)->handle($record);
+                    }),
+
+                EditAction::make(),
+                DeleteAction::make(),
+                RestoreAction::make(),
+                ForceDeleteAction::make()
+                    ->label('Delete permanently')
+                    ->requiresConfirmation(),
             ])
+
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

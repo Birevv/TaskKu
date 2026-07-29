@@ -47,7 +47,7 @@ class TaskStatsOverview extends StatsOverviewWidget
             Stat::make('Completed', $completed)
                 ->description('Task yang sudah selesai')
                 ->icon('heroicon-o-check-circle')
-                ->color('success'), 
+                ->color('success'),
 
             Stat::make('Overdue', $overdue)
                 ->description('Melewati tenggat waktu')

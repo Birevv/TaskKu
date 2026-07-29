@@ -2,19 +2,42 @@
 
 namespace Tests\Feature;
 
+use App\Actions\Task\ChangeTaskStatusAction;
+use App\Enums\TaskPriority;
+use App\Enums\TaskStatus;
+use App\Models\Task;
+use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class ChangeStatusActionTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
+    use RefreshDatabase;
 
-        $response->assertStatus(200);
+    public function test_completing_task_sets_completed_at(): void
+    {
+        $user = User::factory()->create();
+
+        $workspace = Workspace::forceCreate([
+            'owner_id' => $user->id,
+            'name' => 'Test Workspace',
+            'slug' => 'test-workspace',
+        ]);
+
+        $task = Task::forceCreate([
+            'workspace_id' => $workspace->id,
+            'created_by' => $user->id,
+            'title' => 'Test Task',
+            'priority' => TaskPriority::Medium,
+            'status' => TaskStatus::Pending,
+
+        ]);
+
+        $result = app(ChangeTaskStatusAction::class)
+            ->handle($task, TaskStatus::Completed);
+
+        $this->assertSame(TaskStatus::Completed, $result->status);
+        $this->assertNotNull($result->completed_at);
     }
 }
