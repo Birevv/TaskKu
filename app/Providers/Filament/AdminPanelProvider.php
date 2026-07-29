@@ -42,7 +42,6 @@ class AdminPanelProvider extends PanelProvider
             ->registration(Register::class)
             ->passwordReset()
             ->profile(EditProfile::class, isSimple: false)
-            ->emailVerification()
             ->emailChangeVerification()
             ->multiFactorAuthentication([
                 AppAuthentication::make()

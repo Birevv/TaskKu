@@ -13,7 +13,6 @@ use Filament\Models\Contracts\HasDefaultTenant;
 use Filament\Models\Contracts\HasName;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
@@ -28,7 +27,7 @@ use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['name', 'email', 'password', 'avatar_path'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasDefaultTenant, HasName, HasTenants, MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasDefaultTenant, HasName, HasTenants
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;

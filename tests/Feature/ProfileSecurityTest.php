@@ -3,16 +3,19 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\Auth\EditProfile;
+use App\Filament\Pages\Auth\Register;
 use App\Models\User;
 use App\Models\Workspace;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Auth\Notifications\NoticeOfEmailChangeRequest;
 use Filament\Auth\Notifications\VerifyEmailChange;
 use Filament\Facades\Filament;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -21,15 +24,17 @@ class ProfileSecurityTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_panel_enables_profile_email_verification_and_recoverable_app_authentication(): void
+    public function test_panel_disables_registration_email_verification_but_preserves_email_change_and_account_security(): void
     {
         $panel = Filament::getPanel('app');
         $providers = $panel->getMultiFactorAuthenticationProviders();
 
         $this->assertTrue($panel->hasProfile());
         $this->assertSame(EditProfile::class, $panel->getProfilePage());
-        $this->assertTrue($panel->hasEmailVerification());
+        $this->assertFalse($panel->hasEmailVerification());
         $this->assertTrue($panel->hasEmailChangeVerification());
+        $this->assertFalse(is_a(User::class, MustVerifyEmail::class, true));
+        $this->assertFalse(Route::has('filament.app.auth.email-verification.verify'));
         $this->assertArrayHasKey('app', $providers);
         $this->assertInstanceOf(AppAuthentication::class, $providers['app']);
         $this->assertTrue($providers['app']->isRecoverable());
@@ -81,16 +86,32 @@ class ProfileSecurityTest extends TestCase
         $this->assertStringContainsString('/storage/avatars/', $user->getFilamentAvatarUrl());
     }
 
-    public function test_user_can_verify_their_email_address(): void
+    public function test_registration_does_not_send_email_verification_and_authenticates_the_user(): void
     {
-        $user = User::factory()->unverified()->create();
-        $this->setFilamentUser($user);
+        Notification::fake();
+        Filament::setCurrentPanel(Filament::getPanel('app'));
+        Filament::setTenant(null);
 
-        $verificationUrl = Filament::getPanel('app')->getVerifyEmailUrl($user);
+        Livewire::test(Register::class)
+            ->fillForm([
+                'name' => 'New User',
+                'email' => 'new-user@example.com',
+                'password' => 'A-secure-password-2026',
+                'passwordConfirmation' => 'A-secure-password-2026',
+            ])
+            ->call('register')
+            ->assertHasNoFormErrors();
 
-        $this->get($verificationUrl)->assertRedirect();
+        $user = User::query()
+            ->where('email', 'new-user@example.com')
+            ->first();
 
-        $this->assertTrue($user->refresh()->hasVerifiedEmail());
+        $this->assertNotNull($user);
+        $this->assertNull($user->email_verified_at);
+        $this->assertTrue(Hash::check('A-secure-password-2026', $user->password));
+        $this->assertNotSame('A-secure-password-2026', $user->password);
+        $this->assertAuthenticatedAs($user);
+        Notification::assertNothingSent();
     }
 
     public function test_email_change_is_only_applied_after_the_new_address_is_verified(): void
