@@ -43,18 +43,18 @@ class TaskForm
                             ->required(),
 
                         DateTimePicker::make('due_at')
-                            ->label("Due date")
+                            ->label('Due date')
                             ->seconds(false)
                             ->native(false),
 
                         DateTimePicker::make('reminder_at')
-                            ->label("Reminder")
+                            ->label('Reminder')
                             ->seconds(false)
                             ->native(false)
                             ->beforeOrEqual('due_at'),
 
-                        Select::make('assginees')
-                            ->Label('Assignees')
+                        Select::make('assignees')
+                            ->label('Assignees')
                             ->relationship(
                                 name: 'assignees',
                                 titleAttribute: 'name'
@@ -62,7 +62,7 @@ class TaskForm
                             ->multiple()
                             ->searchable()
                             ->preload()
-                            ->columnSpanFull()
+                            ->columnSpanFull(),
                     ])
                     ->columns(2),
             ]);
