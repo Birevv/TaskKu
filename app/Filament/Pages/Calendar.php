@@ -13,7 +13,6 @@ use Carbon\CarbonInterface;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
-use UnitEnum;
 
 class Calendar extends Page
 {
@@ -23,9 +22,7 @@ class Calendar extends Page
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Workspace';
-
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
 
     public int $year;
 

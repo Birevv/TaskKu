@@ -13,7 +13,7 @@ class LandingPageTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('TaskFlow')
+            ->assertSee('Taskku')
             ->assertSee('Make room for work')
             ->assertSee('Everything in one flow')
             ->assertSee('href="'.url('/app/register').'"', escape: false)
@@ -24,5 +24,15 @@ class LandingPageTest extends TestCase
     {
         $this->get('/app/login')->assertOk();
         $this->get('/app/register')->assertOk();
+    }
+
+    public function test_authentication_pages_link_back_to_the_landing_page(): void
+    {
+        foreach (['/app/login', '/app/register'] as $authenticationPage) {
+            $this->get($authenticationPage)
+                ->assertOk()
+                ->assertSee('href="'.route('home').'"', escape: false)
+                ->assertSee('Back to home');
+        }
     }
 }

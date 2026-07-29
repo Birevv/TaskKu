@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Auth;
+use UnitEnum;
 
 class Preferences extends Page
 {
@@ -25,6 +26,10 @@ class Preferences extends Page
     protected static ?string $navigationLabel = 'Preferences';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 1;
 
     public ?array $data = [];
 

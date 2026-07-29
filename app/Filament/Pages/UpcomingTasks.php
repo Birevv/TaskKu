@@ -11,7 +11,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class UpcomingTasks extends Page implements HasTable
 {
@@ -23,7 +22,7 @@ class UpcomingTasks extends Page implements HasTable
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Workspace';
+    protected static ?int $navigationSort = 3;
 
     public function table(Table $table): Table
     {

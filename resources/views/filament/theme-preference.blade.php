@@ -23,6 +23,15 @@
         const allowedDensities = ['comfortable', 'compact'];
         const savedDensity = @js($density);
 
+        try {
+            if (sessionStorage.getItem('taskku:auth-transition') === 'pending') {
+                document.documentElement.classList.add('taskku-auth-transition-entry');
+                sessionStorage.removeItem('taskku:auth-transition');
+            }
+        } catch {
+            // Authentication pages remain usable when browser storage is unavailable.
+        }
+
         if (allowedThemes.includes(savedTheme)) {
             localStorage.setItem('theme', savedTheme);
         }

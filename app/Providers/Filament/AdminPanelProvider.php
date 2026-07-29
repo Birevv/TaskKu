@@ -2,24 +2,23 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Dashboard;
 use App\Filament\Pages\Auth\EditProfile;
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Tenancy\EditWorkspaceProfile;
 use App\Filament\Pages\Tenancy\RegisterWorkspace;
-use App\Filament\Widgets\DailyProgress;
-use App\Filament\Widgets\TaskStatsOverview;
 use App\Models\Workspace;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -36,27 +35,38 @@ class AdminPanelProvider extends PanelProvider
             ->id('app')
             ->path('app')
             ->viteTheme('resources/css/filament/app/theme.css')
-            ->brandName('TaskFlow')
-            ->login()
-            ->registration()
+            ->brandName('Taskku')
+            ->brandLogo(fn () => view('filament.components.logo'))
+            ->brandLogoHeight('2.25rem')
+            ->login(Login::class)
+            ->registration(Register::class)
             ->passwordReset()
             ->profile(EditProfile::class, isSimple: false)
             ->emailVerification()
             ->emailChangeVerification()
             ->multiFactorAuthentication([
                 AppAuthentication::make()
-                    ->brandName('TaskFlow')
+                    ->brandName('Taskku')
                     ->recoverable(),
             ])
             ->databaseNotifications()
+            ->topbar(false)
+            ->sidebarWidth('17rem')
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
                 fn () => view('filament.theme-preference'),
+            )
+            ->renderHook(
+                PanelsRenderHook::SIMPLE_PAGE_START,
+                fn () => view('filament.auth.back-to-home'),
+                scopes: [Login::class, Register::class],
             )
             ->tenant(
                 Workspace::class,
                 slugAttribute: 'slug',
             )
+            ->navigation(fn (): bool => Filament::getTenant() instanceof Workspace)
+            ->tenantMenu(fn (): bool => Filament::getTenant() instanceof Workspace)
             ->tenantRoutePrefix('workspaces')
             ->tenantRegistration(RegisterWorkspace::class)
             ->tenantProfile(EditWorkspaceProfile::class)
@@ -69,12 +79,6 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                AccountWidget::class,
-                TaskStatsOverview::class,
-                FilamentInfoWidget::class,
-                DailyProgress::class,
-            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

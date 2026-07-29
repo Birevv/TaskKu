@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Pages\Auth\EditProfile;
 use App\Models\User;
+use App\Models\Workspace;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Auth\Notifications\NoticeOfEmailChangeRequest;
 use Filament\Auth\Notifications\VerifyEmailChange;
@@ -32,6 +33,24 @@ class ProfileSecurityTest extends TestCase
         $this->assertArrayHasKey('app', $providers);
         $this->assertInstanceOf(AppAuthentication::class, $providers['app']);
         $this->assertTrue($providers['app']->isRecoverable());
+    }
+
+    public function test_profile_page_is_available_outside_a_tenant_route(): void
+    {
+        $user = User::factory()->create();
+        $workspace = Workspace::create([
+            'owner_id' => $user->getKey(),
+            'name' => 'Personal Workspace',
+            'slug' => 'personal-workspace',
+        ]);
+        $workspace->members()->attach($user, [
+            'role' => 'owner',
+            'joined_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->get('/app/profile')
+            ->assertOk();
     }
 
     public function test_user_can_update_name_password_and_avatar(): void
