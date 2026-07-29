@@ -2,11 +2,13 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Tenancy\EditWorkspaceProfile;
 use App\Filament\Pages\Tenancy\RegisterWorkspace;
 use App\Filament\Widgets\DailyProgress;
 use App\Filament\Widgets\TaskStatsOverview;
 use App\Models\Workspace;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -38,6 +40,14 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->registration()
             ->passwordReset()
+            ->profile(EditProfile::class, isSimple: false)
+            ->emailVerification()
+            ->emailChangeVerification()
+            ->multiFactorAuthentication([
+                AppAuthentication::make()
+                    ->brandName('TaskFlow')
+                    ->recoverable(),
+            ])
             ->databaseNotifications()
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
