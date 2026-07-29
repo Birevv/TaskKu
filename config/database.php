@@ -61,7 +61,6 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => base_path('database/certs/isrgrootx1.pem'),
-                Mysql::ATTR_SSL_VERIFY_SERVER_CERT => true,
             ]) : [],
         ],
 
