@@ -34,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('app')
             ->path('app')
             ->viteTheme('resources/css/filament/app/theme.css')
-            ->brandName('Taskku')
+            ->brandName('TaskFlow')
             ->login()
             ->registration()
             ->passwordReset()
