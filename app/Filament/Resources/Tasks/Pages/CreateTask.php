@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Tasks\Pages;
 
 use App\Enums\TaskStatus;
 use App\Filament\Resources\Tasks\TaskResource;
+use App\Models\Workspace;
+use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +18,11 @@ class CreateTask extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        $workspace = Filament::getTenant();
+
+        abort_unless($workspace instanceof Workspace, 403);
+
+        $data['workspace_id'] = $workspace->getKey();
         $data['created_by'] = Auth::id();
         $data['status'] = TaskStatus::Pending->value;
 

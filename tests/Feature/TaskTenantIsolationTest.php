@@ -16,7 +16,7 @@ class TaskTenantIsolationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_cannot_view_task_from_antoher_workspace(): void
+    public function test_user_cannot_manage_task_from_another_workspace(): void
     {
         $userA = User::factory()->create();
         $userB = User::factory()->create();
@@ -66,5 +66,12 @@ class TaskTenantIsolationTest extends TestCase
         $this->assertFalse(
             Gate::forUser($userA)->allows('view', $taskB)
         );
+
+        foreach (['update', 'delete', 'restore', 'forceDelete'] as $ability) {
+            $this->assertFalse(
+                Gate::forUser($userA)->allows($ability, $taskB),
+                "The [{$ability}] ability should reject tasks from another workspace.",
+            );
+        }
     }
 }

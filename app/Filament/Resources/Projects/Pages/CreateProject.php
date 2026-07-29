@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Projects\Pages;
 
 use App\Filament\Resources\Projects\ProjectResource;
 use App\Models\Project;
+use App\Models\Workspace;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,11 @@ class CreateProject extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        $workspace = Filament::getTenant();
+
+        abort_unless($workspace instanceof Workspace, 403);
+
+        $data['workspace_id'] = $workspace->getKey();
         $data['created_by'] = Auth::id();
 
         $baseSlug = Str::slug($data['name']) ?: 'project';
@@ -25,7 +31,7 @@ class CreateProject extends CreateRecord
 
         while (
             Project::query()
-                ->whereBelongsTo(Filament::getTenant())
+                ->whereBelongsTo($workspace)
                 ->where('slug', $slug)
                 ->exists()
         ) {

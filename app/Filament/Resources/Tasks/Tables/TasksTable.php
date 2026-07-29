@@ -7,6 +7,7 @@ use App\Actions\Task\ChangeTaskStatusAction;
 use App\Actions\Task\UnarchiveTaskAction;
 use App\Enums\TaskStatus;
 use App\Models\Task;
+use App\Models\Workspace;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -16,9 +17,11 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Facades\Filament;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TasksTable
 {
@@ -71,7 +74,17 @@ class TasksTable
                     ]),
 
                 SelectFilter::make('project')
-                    ->relationship('project', 'name')
+                    ->relationship(
+                        'project',
+                        'name',
+                        function (Builder $query): Builder {
+                            $workspace = Filament::getTenant();
+
+                            return $workspace instanceof Workspace
+                                ? $query->whereBelongsTo($workspace)
+                                : $query->whereRaw('1 = 0');
+                        },
+                    )
                     ->searchable()
                     ->preload(),
             ])
