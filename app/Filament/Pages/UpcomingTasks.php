@@ -4,14 +4,13 @@ namespace App\Filament\Pages;
 
 use App\Models\Task;
 use App\Models\Workspace;
+use BackedEnum;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use BackedEnum;
 use UnitEnum;
 
 class UpcomingTasks extends Page implements HasTable
@@ -26,18 +25,20 @@ class UpcomingTasks extends Page implements HasTable
 
     protected static string|UnitEnum|null $navigationGroup = 'Workspace';
 
-    public function table(Table $table) : Table
+    public function table(Table $table): Table
     {
         $workspace = Filament::getTenant();
 
         $query = Task::query()
-            ->whereNull('archived_at')
-            ->whereNull('deleted_at')
-            ->where('due_at','>=', now())
+            ->active()
+            ->whereNotNull('due_at')
+            ->where('due_at', '>=', now())
             ->orderBy('due_at');
 
-        if($workspace instanceof Workspace) {
+        if ($workspace instanceof Workspace) {
             $query->whereBelongsTo($workspace);
+        } else {
+            $query->whereRaw('1 = 0');
         }
 
         return $table
