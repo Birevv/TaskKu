@@ -31,6 +31,7 @@ class PreferencesThemeTest extends TestCase
         $this->assertDatabaseHas('user_settings', [
             'user_id' => $user->getKey(),
             'theme' => 'dark',
+            'density' => 'comfortable',
         ]);
     }
 
@@ -45,5 +46,33 @@ class PreferencesThemeTest extends TestCase
 
         $this->assertStringContainsString("const savedTheme = 'dark';", $html);
         $this->assertStringContainsString("new CustomEvent('theme-changed'", $html);
+    }
+
+    public function test_density_preference_is_persisted_and_applied_to_the_document(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(Preferences::class)
+            ->fillForm([
+                'theme' => 'system',
+                'density' => 'compact',
+                'notify_task_assigned' => true,
+                'notify_task_due' => true,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors()
+            ->assertDispatched('taskku-density-updated', density: 'compact');
+
+        $this->assertDatabaseHas('user_settings', [
+            'user_id' => $user->getKey(),
+            'density' => 'compact',
+        ]);
+
+        $html = view('filament.theme-preference')->render();
+
+        $this->assertStringContainsString("const savedDensity = 'compact';", $html);
+        $this->assertStringContainsString('document.documentElement.dataset.density = savedDensity;', $html);
+        $this->assertStringContainsString("window.addEventListener('taskku-density-updated'", $html);
     }
 }

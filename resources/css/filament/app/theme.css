@@ -1,0 +1,18 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+:root[data-density='compact'] .fi-ta-cell > .fi-ta-col,
+:root[data-density='compact'] .fi-ta-cell.fi-ta-selection-cell,
+:root[data-density='compact'] .fi-ta-cell:has(.fi-ta-actions) {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+:root[data-density='comfortable'] .fi-ta-cell > .fi-ta-col,
+:root[data-density='comfortable'] .fi-ta-cell.fi-ta-selection-cell,
+:root[data-density='comfortable'] .fi-ta-cell:has(.fi-ta-actions) {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\DisplayDensity;
 use App\Models\User;
 use App\Models\UserSettings;
 use BackedEnum;
@@ -52,10 +53,8 @@ class Preferences extends Page
 
                             Select::make('density')
                                 ->label('Density')
-                                ->options([
-                                    'comfortable' => 'Comfortable',
-                                    'compact' => 'Compact',
-                                ])
+                                ->options(DisplayDensity::class)
+                                ->default(DisplayDensity::Comfortable)
                                 ->required(),
                         ]),
 
@@ -91,6 +90,11 @@ class Preferences extends Page
         $this->dispatch(
             'taskku-theme-updated',
             theme: $state['theme'],
+        );
+
+        $this->dispatch(
+            'taskku-density-updated',
+            density: $state['density'],
         );
 
         Notification::make()

@@ -33,6 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             ->path('app')
+            ->viteTheme('resources/css/filament/app/theme.css')
             ->brandName('Taskku')
             ->login()
             ->registration()

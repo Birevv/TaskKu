@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DisplayDensity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ class UserSettings extends Model
     protected $fillable = [
         'user_id',
         'theme',
+        'density',
         'timezone',
         'notify_task_assigned',
         'notify_task_due',
@@ -21,6 +23,7 @@ class UserSettings extends Model
     protected function casts(): array
     {
         return [
+            'density' => DisplayDensity::class,
             'notify_task_assigned' => 'boolean',
             'notify_task_due' => 'boolean',
         ];
