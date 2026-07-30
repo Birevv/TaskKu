@@ -80,12 +80,15 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     public function canAccessTenant(Model $tenant): bool
     {
-        return $this->workspaces()->whereKey($tenant)->exists();
+        return $tenant instanceof Workspace
+            && $this->workspaces->contains($tenant->getKey());
     }
 
     public function getDefaultTenant(Panel $panel): ?Model
     {
-        return $this->workspaces()->oldest('workspace_members.joined_at')->first();
+        return $this->workspaces
+            ->sortBy(fn (Workspace $workspace): mixed => $workspace->pivot?->joined_at)
+            ->first();
     }
 
     public function getFilamentName(): string

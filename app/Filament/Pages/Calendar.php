@@ -12,6 +12,7 @@ use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Auth;
 
 class Calendar extends Page
@@ -136,15 +137,26 @@ class Calendar extends Page
         $timezone = $this->getUserTimezone();
         $events = [];
         $tasks = Task::query()
-            ->with('project')
-            ->whereBelongsTo($workspace)
-            ->whereNull('archived_at')
-            ->whereNotNull('due_at')
-            ->whereBetween('due_at', [
+            ->leftJoin('projects', function (JoinClause $join): void {
+                $join
+                    ->on('projects.id', '=', 'tasks.project_id')
+                    ->whereNull('projects.deleted_at');
+            })
+            ->where('tasks.workspace_id', $workspace->getKey())
+            ->whereNull('tasks.archived_at')
+            ->whereNotNull('tasks.due_at')
+            ->whereBetween('tasks.due_at', [
                 $gridStart->utc(),
                 $gridEnd->endOfDay()->utc(),
             ])
-            ->orderBy('due_at')
+            ->select([
+                'tasks.id',
+                'tasks.title',
+                'tasks.priority',
+                'tasks.due_at',
+                'projects.name as project_name',
+            ])
+            ->orderBy('tasks.due_at')
             ->get();
 
         foreach ($tasks as $task) {
@@ -157,7 +169,7 @@ class Calendar extends Page
                 'id' => $task->getKey(),
                 'title' => $task->title,
                 'time' => $dueAt->format('H:i'),
-                'project' => $task->project?->name,
+                'project' => $task->project_name,
                 'priority' => $priority->getLabel(),
                 'colorClasses' => $this->getPriorityColorClasses($priority),
                 'url' => TaskResource::getUrl('edit', ['record' => $task], tenant: $workspace),

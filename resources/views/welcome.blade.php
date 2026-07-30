@@ -304,7 +304,7 @@
                             href="{{ url('/app/register') }}"
                             class="mt-8 inline-flex items-center gap-2 rounded-xl bg-amber-400 px-6 py-3.5 text-base font-bold text-amber-950 transition hover:-translate-y-0.5 hover:bg-amber-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-400"
                         >
-                            Get Started for Free
+                            Get Started right now
                             <span class="landing-arrow" aria-hidden="true">→</span>
                         </a>
                     </div>

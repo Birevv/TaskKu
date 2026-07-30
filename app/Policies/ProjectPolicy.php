@@ -19,7 +19,7 @@ class ProjectPolicy
 
     public function create(User $user): bool
     {
-        return $user->workspaces()->exists();
+        return $user->workspaces->isNotEmpty();
     }
 
     public function update(User $user, Project $project): bool
@@ -44,8 +44,6 @@ class ProjectPolicy
 
     private function belongsToUserWorkspace(User $user, Project $project): bool
     {
-        return $user->workspaces()
-            ->whereKey($project->workspace_id)
-            ->exists();
+        return $user->workspaces->contains($project->workspace_id);
     }
 }

@@ -12,7 +12,7 @@ class TaskPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->workspaces()->exists();
+        return $user->workspaces->isNotEmpty();
     }
 
     /**
@@ -28,7 +28,7 @@ class TaskPolicy
      */
     public function create(User $user): bool
     {
-        return $user->workspaces()->exists();
+        return $user->workspaces->isNotEmpty();
     }
 
     /**
@@ -65,8 +65,6 @@ class TaskPolicy
 
     private function belongsToUserWorkspace(User $user, Task $task): bool
     {
-        return $user->workspaces()
-            ->whereKey($task->workspace_id)
-            ->exists();
+        return $user->workspaces->contains($task->workspace_id);
     }
 }

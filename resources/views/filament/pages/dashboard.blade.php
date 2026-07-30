@@ -9,7 +9,7 @@
                 </p>
             </div>
 
-            <a href="{{ $createTaskUrl }}" class="taskku-new-task-button">
+            <a href="{{ $createTaskUrl }}" class="taskku-new-task-button" wire:navigate.hover>
                 <x-filament::icon icon="heroicon-m-plus" />
                 <span>New task</span>
             </a>
@@ -93,9 +93,9 @@
                                 @endif
                             </button>
 
-                            <a href="{{ $taskUrl }}" class="taskku-task-copy">
+                            <a href="{{ $taskUrl }}" class="taskku-task-copy" wire:navigate.hover>
                                 <strong class="{{ $isCompleted ? 'is-completed' : '' }}">{{ $task->title }}</strong>
-                                <span>{{ $task->project?->name ?? 'Personal' }}</span>
+                                <span>{{ $task->project_name ?? 'Personal' }}</span>
                             </a>
 
                             <span class="taskku-priority taskku-priority-{{ $priority->value }}">
@@ -108,7 +108,7 @@
                             <span><x-filament::icon icon="heroicon-o-sparkles" /></span>
                             <h3>Your day is clear</h3>
                             <p>Add a task for today or enjoy the extra breathing room.</p>
-                            <a href="{{ $createTaskUrl }}">Plan a task</a>
+                            <a href="{{ $createTaskUrl }}" wire:navigate.hover>Plan a task</a>
                         </div>
                     @endforelse
                 </div>
@@ -116,7 +116,7 @@
 
             <aside class="taskku-panel taskku-calendar-panel">
                 <header class="taskku-panel-header">
-                    <a href="{{ $calendarUrl }}">{{ $monthLabel }}</a>
+                    <a href="{{ $calendarUrl }}" wire:navigate.hover>{{ $monthLabel }}</a>
                     <span>{{ $yearLabel }}</span>
                 </header>
 
@@ -141,7 +141,7 @@
                 </div>
 
                 @if ($nextDeadline)
-                    <a href="{{ $nextDeadlineUrl }}" class="taskku-deadline-card">
+                    <a href="{{ $nextDeadlineUrl }}" class="taskku-deadline-card" wire:navigate.hover>
                         <span>Next deadline</span>
                         <strong>{{ $nextDeadline->title }}</strong>
                         <small>
@@ -150,7 +150,7 @@
                         </small>
                     </a>
                 @else
-                    <a href="{{ $createTaskUrl }}" class="taskku-deadline-card is-empty">
+                    <a href="{{ $createTaskUrl }}" class="taskku-deadline-card is-empty" wire:navigate.hover>
                         <span>Next deadline</span>
                         <strong>Nothing scheduled</strong>
                         <small>Add a due date to stay ahead.</small>

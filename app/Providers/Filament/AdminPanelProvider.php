@@ -50,6 +50,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->databaseNotifications()
             ->topbar(false)
+            ->spa(hasPrefetching: true)
             ->sidebarWidth('17rem')
             ->renderHook(
                 PanelsRenderHook::HEAD_START,

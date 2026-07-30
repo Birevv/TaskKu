@@ -18,6 +18,7 @@ use Filament\Support\Enums\Width;
 use Filament\Widgets\Widget;
 use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
@@ -89,13 +90,18 @@ class Dashboard extends BaseDashboard
         $dayEndUtc = $today->endOfDay()->utc();
 
         $todayTasks = Task::query()
-            ->with('project')
-            ->whereBelongsTo($workspace)
-            ->whereNull('archived_at')
-            ->where('status', '!=', TaskStatus::Cancelled)
-            ->whereBetween('due_at', [$dayStartUtc, $dayEndUtc])
-            ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END")
-            ->orderBy('due_at')
+            ->leftJoin('projects', function (JoinClause $join): void {
+                $join
+                    ->on('projects.id', '=', 'tasks.project_id')
+                    ->whereNull('projects.deleted_at');
+            })
+            ->where('tasks.workspace_id', $workspace->getKey())
+            ->whereNull('tasks.archived_at')
+            ->where('tasks.status', '!=', TaskStatus::Cancelled)
+            ->whereBetween('tasks.due_at', [$dayStartUtc, $dayEndUtc])
+            ->select(['tasks.*', 'projects.name as project_name'])
+            ->orderByRaw("CASE tasks.priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END")
+            ->orderBy('tasks.due_at')
             ->get();
 
         $todayTotal = $todayTasks->count();
@@ -113,27 +119,25 @@ class Dashboard extends BaseDashboard
         $weekEnd = $today->endOfWeek(CarbonInterface::SUNDAY);
         $previousWeekStart = $weekStart->subWeek();
         $previousWeekEnd = $weekEnd->subWeek();
-
-        $completedTotal = Task::query()
-            ->whereBelongsTo($workspace)
-            ->whereNull('archived_at')
-            ->where('status', TaskStatus::Completed)
-            ->count();
-
-        $completedThisWeek = $this->completedBetween($workspace, $weekStart, $weekEnd);
-        $completedPreviousWeek = $this->completedBetween($workspace, $previousWeekStart, $previousWeekEnd);
+        $upcomingStart = $today->addDay()->startOfDay()->utc();
+        $upcomingEnd = $today->addDays(7)->endOfDay()->utc();
+        $stats = $this->getTaskStats(
+            $workspace,
+            $weekStart,
+            $weekEnd,
+            $previousWeekStart,
+            $previousWeekEnd,
+            $upcomingStart,
+            $upcomingEnd,
+        );
+        $completedTotal = $stats['completedTotal'];
+        $completedThisWeek = $stats['completedThisWeek'];
+        $completedPreviousWeek = $stats['completedPreviousWeek'];
         $completionTrend = $completedPreviousWeek === 0
             ? ($completedThisWeek > 0 ? 100 : 0)
             : (int) round((($completedThisWeek - $completedPreviousWeek) / $completedPreviousWeek) * 100);
 
-        $upcomingCount = Task::query()
-            ->active()
-            ->whereBelongsTo($workspace)
-            ->whereBetween('due_at', [$today->addDay()->startOfDay()->utc(), $today->addDays(7)->endOfDay()->utc()])
-            ->count();
-
         $nextDeadline = Task::query()
-            ->with('project')
             ->active()
             ->whereBelongsTo($workspace)
             ->whereNotNull('due_at')
@@ -160,24 +164,62 @@ class Dashboard extends BaseDashboard
             'todayCompleted' => $todayCompleted,
             'todayTasks' => $todayTasks,
             'todayTotal' => $todayTotal,
-            'upcomingCount' => $upcomingCount,
+            'upcomingCount' => $stats['upcomingCount'],
             'userFirstName' => str((string) ($user?->name ?? 'there'))->before(' ')->toString(),
             'workspace' => $workspace,
             'yearLabel' => $today->format('Y'),
         ];
     }
 
-    private function completedBetween(
+    /**
+     * @return array{
+     *     completedTotal: int,
+     *     completedThisWeek: int,
+     *     completedPreviousWeek: int,
+     *     upcomingCount: int
+     * }
+     */
+    private function getTaskStats(
         Workspace $workspace,
-        CarbonImmutable $start,
-        CarbonImmutable $end,
-    ): int {
-        return Task::query()
+        CarbonImmutable $weekStart,
+        CarbonImmutable $weekEnd,
+        CarbonImmutable $previousWeekStart,
+        CarbonImmutable $previousWeekEnd,
+        CarbonImmutable $upcomingStart,
+        CarbonImmutable $upcomingEnd,
+    ): array {
+        $stats = Task::query()
             ->whereBelongsTo($workspace)
             ->whereNull('archived_at')
-            ->where('status', TaskStatus::Completed)
-            ->whereBetween('completed_at', [$start->utc(), $end->utc()])
-            ->count();
+            ->selectRaw(
+                <<<'SQL'
+                    COALESCE(SUM(CASE WHEN status = ? THEN 1 ELSE 0 END), 0) AS completed_total,
+                    COALESCE(SUM(CASE WHEN status = ? AND completed_at BETWEEN ? AND ? THEN 1 ELSE 0 END), 0) AS completed_this_week,
+                    COALESCE(SUM(CASE WHEN status = ? AND completed_at BETWEEN ? AND ? THEN 1 ELSE 0 END), 0) AS completed_previous_week,
+                    COALESCE(SUM(CASE WHEN status IN (?, ?) AND due_at BETWEEN ? AND ? THEN 1 ELSE 0 END), 0) AS upcoming_count
+                SQL,
+                [
+                    TaskStatus::Completed->value,
+                    TaskStatus::Completed->value,
+                    $weekStart->utc(),
+                    $weekEnd->utc(),
+                    TaskStatus::Completed->value,
+                    $previousWeekStart->utc(),
+                    $previousWeekEnd->utc(),
+                    TaskStatus::Pending->value,
+                    TaskStatus::InProgress->value,
+                    $upcomingStart,
+                    $upcomingEnd,
+                ],
+            )
+            ->first();
+
+        return [
+            'completedTotal' => (int) ($stats?->completed_total ?? 0),
+            'completedThisWeek' => (int) ($stats?->completed_this_week ?? 0),
+            'completedPreviousWeek' => (int) ($stats?->completed_previous_week ?? 0),
+            'upcomingCount' => (int) ($stats?->upcoming_count ?? 0),
+        ];
     }
 
     /**

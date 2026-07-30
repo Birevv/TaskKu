@@ -10,7 +10,9 @@ use App\Models\User;
 use App\Models\Workspace;
 use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -56,6 +58,42 @@ class DashboardPageTest extends TestCase
             'status' => TaskStatus::Completed->value,
         ]);
         $this->assertNotNull($visibleTask->fresh()->completed_at);
+    }
+
+    public function test_dashboard_loads_task_data_in_four_queries(): void
+    {
+        CarbonImmutable::setTestNow('2026-07-29 09:00:00 UTC');
+
+        [$user, $workspace] = $this->createUserAndWorkspace('Product Team');
+        $this->createTask($workspace, $user, [
+            'title' => 'Query-efficient task',
+            'due_at' => '2026-07-29 12:00:00',
+        ]);
+
+        $this->actingAs($user);
+        Filament::setCurrentPanel(Filament::getPanel('app'));
+        Filament::setTenant($workspace);
+
+        $taskQueries = [];
+
+        DB::listen(function (QueryExecuted $query) use (&$taskQueries): void {
+            if (preg_match('/\b(?:from|join)\s+["`]?tasks["`]?\b/i', $query->sql)) {
+                $taskQueries[] = $query->sql;
+            }
+        });
+
+        Livewire::test(Dashboard::class)
+            ->assertSee('Query-efficient task');
+
+        $this->assertCount(4, $taskQueries, implode(PHP_EOL, $taskQueries));
+    }
+
+    public function test_panel_uses_spa_navigation_with_prefetching(): void
+    {
+        $panel = Filament::getPanel('app');
+
+        $this->assertTrue($panel->hasSpaMode());
+        $this->assertTrue($panel->hasSpaPrefetching());
     }
 
     /**

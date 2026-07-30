@@ -73,6 +73,7 @@
                                 @foreach ($day['events'] as $event)
                                     <a
                                         href="{{ $event['url'] }}"
+                                        wire:navigate.hover
                                         title="{{ $event['title'] }} — {{ $event['priority'] }}"
                                         class="group block rounded-md border-l-4 px-2 py-1.5 transition {{ $event['colorClasses'] }}"
                                     >

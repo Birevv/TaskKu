@@ -66,6 +66,6 @@ class Task extends Model
     {
         return $query
             ->whereNull('archived_at')
-            ->whereNotIn('status', [TaskStatus::Completed, TaskStatus::Cancelled]);
+            ->whereIn('status', [TaskStatus::Pending, TaskStatus::InProgress]);
     }
 }

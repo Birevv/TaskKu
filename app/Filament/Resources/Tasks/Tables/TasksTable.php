@@ -47,7 +47,7 @@ class TasksTable
                     ->badge()
                     ->sortable(),
 
-                TextColumn::make('assginees.name')
+                TextColumn::make('assignees.name')
                     ->label('Assignees')
                     ->badge(),
 
