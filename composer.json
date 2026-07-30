@@ -50,7 +50,9 @@
             "@php artisan test"
         ],
         "vercel": [
-            "@php artisan optimize"
+            "@php artisan route:cache",
+            "@php artisan event:cache",
+            "@php artisan filament:optimize"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

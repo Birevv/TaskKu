@@ -51,6 +51,7 @@
         "SESSION_SECURE_COOKIE": "true",
         "CACHE_STORE": "array",
         "LOG_CHANNEL": "stderr",
+        "APP_CONFIG_CACHE": "/tmp/config.php",
         "VIEW_COMPILED_PATH": "/tmp"
     }
 }
